@@ -1,6 +1,6 @@
 // ====== CONFIGURAZIONE ======
 // Cambia questi valori con i tuoi
-const GITHUB_OWNER = "YOUR_GITHUB_USERNAME";
+const GITHUB_OWNER = "Mobrius";
 const GITHUB_REPO = "ephemeral-social"; // o il nome del repo
 const MAX_POSTS_CLIENT = 50; // quanti post mostrare al massimo nel feed
 
@@ -251,3 +251,4 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("postTitle").focus();
   });
 });
+
