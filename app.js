@@ -4,6 +4,10 @@ const GITHUB_OWNER = "Mobrius";
 const GITHUB_REPO = "ephemeral-social-test"; // o il nome del repo
 const MAX_POSTS_CLIENT = 50; // quanti post mostrare al massimo nel feed
 
+// ====== CLEANUP CLIENT-SIDE THROTTLING ======
+const CLEANUP_LOCAL_KEY = "es_last_cleanup_run";
+const CLEANUP_INTERVAL_HOURS = 48; // tienilo uguale a CLEAN_TIMER su Vercel
+
 // ====== THEME (classic / military) ======
 const THEME_KEY = "es_theme_v1";
 
@@ -120,6 +124,32 @@ function relevanceScoreForIssue(issue, interests) {
 function formatDate(dateStr) {
   const d = new Date(dateStr);
   return d.toLocaleString();
+}
+
+async function maybeRunCleanup() {
+  try {
+    const now = Date.now();
+    const lastRun = parseInt(localStorage.getItem(CLEANUP_LOCAL_KEY) || "0", 10);
+
+    const intervalMs = CLEANUP_INTERVAL_HOURS * 60 * 60 * 1000;
+
+    // se non è ancora passato abbastanza tempo, non fare nulla
+    if (now - lastRun < intervalMs) {
+      return;
+    }
+
+    // prova a chiamare l'API di cleanup (best effort, senza UI)
+    const res = await fetch("/api/cleanup");
+    // possiamo anche ignorare la risposta, ma se vuoi debug:
+    // const data = await res.json();
+    // console.log("Cleanup result:", data);
+
+    // aggiorna il timestamp locale
+    localStorage.setItem(CLEANUP_LOCAL_KEY, String(now));
+  } catch (e) {
+    console.warn("Cleanup call failed (ignored):", e);
+    // in caso di errore NON aggiorniamo lastRun, così ritenterà al prossimo caricamento
+  }
 }
 
 // ====== UI: interessi ======
@@ -411,6 +441,9 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  // Prova a lanciare cleanup, ma solo se sono passate almeno CLEANUP_INTERVAL_HOURS ore
+  maybeRunCleanup();
 
   // Aggiorna automaticamente il feed ogni 10 secondi
   setInterval(() => {
