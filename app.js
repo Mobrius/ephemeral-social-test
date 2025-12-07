@@ -156,10 +156,10 @@ function renderInterestsChips() {
 
 // ====== API: lettura issue ======
 async function fetchIssues() {
-  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues?state=open&per_page=100&sort=created&direction=desc`;
-  const res = await fetch(url);
+  // ora chiamiamo il nostro backend, non direttamente GitHub
+  const res = await fetch("/api/feed");
   if (!res.ok) {
-    throw new Error("Error fetching issues from GitHub");
+    throw new Error("Error fetching issues from backend");
   }
   const data = await res.json();
   // Filtra solo "issue vere" e non PR (di solito hanno field pull_request)
