@@ -4,6 +4,29 @@ const GITHUB_OWNER = "Mobrius";
 const GITHUB_REPO = "ephemeral-social-test"; // o il nome del repo
 const MAX_POSTS_CLIENT = 50; // quanti post mostrare al massimo nel feed
 
+// ====== AUTHOR ID LOCALE ======
+const AUTHOR_ID_KEY = "es_author_id_v1";
+
+function getOrCreateAuthorId() {
+  let id = localStorage.getItem(AUTHOR_ID_KEY);
+  if (!id) {
+    // crea ID tipo esuser-8f3a29c1
+    const rand =
+      Math.random().toString(36).substring(2, 8) +
+      Math.random().toString(36).substring(2, 6);
+    id = "esuser-" + rand;
+    localStorage.setItem(AUTHOR_ID_KEY, id);
+  }
+  return id;
+}
+
+// Estrarre l'author id dal body del post, es. [es-author]:esuser-xxxx
+function extractAuthorIdFromBody(body) {
+  if (!body) return null;
+  const match = body.match(/\[es-author\]:(\S+)/);
+  return match ? match[1].trim() : null;
+}
+
 // ====== UTIL ======
 const interestsKey = "es_interests_v1";
 
@@ -139,20 +162,35 @@ async function loadFeed() {
       const postEl = document.createElement("article");
       postEl.className = "es-post";
 
+      const rawBody = issue.body || "";
+      const authorId = extractAuthorIdFromBody(rawBody);
+
       const header = document.createElement("div");
       header.className = "es-post-header";
-      header.innerHTML = `
-        <span>@${issue.user.login}</span>
-        <span>${formatDate(issue.created_at)}</span>
-      `;
+
+      const leftSpan = document.createElement("span");
+      // Se abbiamo un authorId, usiamo quello, altrimenti fallback a @github_user
+      leftSpan.textContent = authorId ? authorId : `@${issue.user.login}`;
+
+      const rightSpan = document.createElement("span");
+      rightSpan.textContent = formatDate(issue.created_at);
+
+      header.appendChild(leftSpan);
+      header.appendChild(rightSpan);
 
       const title = document.createElement("div");
       title.className = "es-post-title";
       title.textContent = issue.title || "(no title)";
 
-      const body = document.createElement("div");
-      body.className = "es-post-body";
-      body.textContent = issue.body || "";
+      const bodyEl = document.createElement("div");
+      bodyEl.className = "es-post-body";
+
+      // Mostriamo il body SENZA la riga tecnica [es-author]:... e la firma
+      const cleanedBody = rawBody
+        .replace(/\[es-author\]:\S+/, "")
+        .replace(/\n?_Posted via Ephemeral Social_/, "")
+        .trim();
+      bodyEl.textContent = cleanedBody;
 
       const tagsWrap = document.createElement("div");
       tagsWrap.className = "es-post-tags";
@@ -176,7 +214,7 @@ async function loadFeed() {
 
       postEl.appendChild(header);
       postEl.appendChild(title);
-      postEl.appendChild(body);
+      postEl.appendChild(bodyEl);
       if (topics.length) postEl.appendChild(tagsWrap);
 
       feedEl.appendChild(postEl);
@@ -210,6 +248,19 @@ async function publishPost() {
     return;
   }
 
+  const authorId = getOrCreateAuthorId();
+
+  // Corpo che andrà nell'issue
+  let fullBody = body;
+
+  if (tags.length) {
+    fullBody += "\n\n---\nTags: " + tags.map((t) => `#${t}`).join(" ");
+  }
+
+  // Riga tecnica per identificare l'autore
+  fullBody += `\n\n[es-author]:${authorId}`;
+  fullBody += "\n_Posted via Ephemeral Social_";
+
   statusEl.textContent = "Publishing...";
   statusEl.className = "es-status";
 
@@ -217,7 +268,7 @@ async function publishPost() {
     const res = await fetch("/api/new-post", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, body, labels: tags }),
+      body: JSON.stringify({ title, body: fullBody, labels: tags }),
     });
 
     if (!res.ok) {
@@ -245,17 +296,29 @@ window.addEventListener("DOMContentLoaded", () => {
   renderInterestsChips();
   loadFeed();
 
+  // Mostra il tuo Author ID se hai aggiunto un badge nell'HTML
+  const myAuthorId = getOrCreateAuthorId();
+  const badge = document.getElementById("authorIdBadge");
+  if (badge) {
+    badge.textContent = `Your ID: ${myAuthorId}`;
+  }
+
   document.getElementById("publishBtn").addEventListener("click", publishPost);
 
-  document.getElementById("refreshFeedBtn").addEventListener("click", loadFeed);
+  const refreshBtn = document.getElementById("refreshFeedBtn");
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", loadFeed);
+  }
 
-  document.getElementById("newPostBtn").addEventListener("click", () => {
-    document.getElementById("postTitle").focus();
-  });
+  const newPostBtn = document.getElementById("newPostBtn");
+  if (newPostBtn) {
+    newPostBtn.addEventListener("click", () => {
+      document.getElementById("postTitle").focus();
+    });
+  }
 
-  // Aggiorna automaticamente il feed ogni 20 secondi
+  // Aggiorna automaticamente il feed ogni 10 secondi
   setInterval(() => {
     loadFeed();
   }, 10000);
-
 });
