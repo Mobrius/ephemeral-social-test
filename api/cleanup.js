@@ -3,12 +3,17 @@
 // Pulisce i post "vecchi" in base alle variabili ambiente.
 //
 // Env:
-//   GITHUB_OWNER  (es. "Mobrius")
-//   GITHUB_REPO   (es. "ephemeral-social-test")
-//   GITHUB_TOKEN  (token con permesso "public_repo")
-//   CLEAN         = "ON" / "OFF"   (default "ON")
-//   CLEAN_MODE    = "CLOSE" / "DELETE" (default "CLOSE")
-//   CLEAN_TIMER   = ore, es. "48"  (default 48)
+//   GITHUB_OWNER        (es. "Mobrius")
+//   GITHUB_REPO         (es. "ephemeral-social-test")
+//   GITHUB_TOKEN        (token con permesso "public_repo")
+//   CLEAN               = "OFF" / "ON"            (default "ON")
+//   CLEAN_MODE          = "CLOSE" / "DELETE"      (default "CLOSE")
+//   CLEAN_TIMER         = ore, es. "48"          (default 48)
+//
+// NOTE su CLEAN_MODE:
+//   CLOSE  -> chiude le issue (state=closed). Spariscono dal feed, restano su GitHub.
+//   DELETE -> "scrub" + chiusura: svuota testo, marca come expired, chiude.
+//
 
 const OWNER = process.env.GITHUB_OWNER || "Mobrius";
 const REPO = process.env.GITHUB_REPO || "ephemeral-social-test";
@@ -18,8 +23,8 @@ const CLEAN = (process.env.CLEAN || "ON").toUpperCase();
 const CLEAN_MODE = (process.env.CLEAN_MODE || "CLOSE").toUpperCase();
 const CLEAN_TIMER_HOURS = parseInt(process.env.CLEAN_TIMER || "48", 10) || 48;
 
-// per sicurezza, limitiamo i post ripuliti per singola run
-const MAX_ISSUES_PER_RUN = 30;
+// Limite di sicurezza: quante issue ripulire per singola run
+const MAX_ISSUES_PER_RUN = 50;
 
 export default async function handler(req, res) {
   if (req.method !== "GET" && req.method !== "POST") {
@@ -40,14 +45,14 @@ export default async function handler(req, res) {
     const cutoffMs = CLEAN_TIMER_HOURS * 60 * 60 * 1000;
     const cutoffTime = new Date(now - cutoffMs);
 
-    // Prendiamo fino a 100 issue (state=all per vedere anche le chiuse)
-    const listUrl = `https://api.github.com/repos/${OWNER}/${REPO}/issues?state=all&per_page=100&sort=created&direction=asc`;
-
     const headers = {
       Accept: "application/vnd.github+json",
       "User-Agent": "ephemeral-social-cleaner",
       Authorization: `Bearer ${TOKEN}`,
     };
+
+    // Prendiamo fino a 100 issue, state=all per includere anche chiuse
+    const listUrl = `https://api.github.com/repos/${OWNER}/${REPO}/issues?state=all&per_page=100&sort=created&direction=asc`;
 
     const listRes = await fetch(listUrl, { headers });
     if (!listRes.ok) {
@@ -59,7 +64,7 @@ export default async function handler(req, res) {
 
     const issues = await listRes.json();
 
-    // Filtra solo "vere" issue, non PR, più vecchie del cutoff
+    // Seleziona solo le issue "vere" (no PR) più vecchie del cutoff
     const oldIssues = issues.filter((iss) => {
       if (iss.pull_request) return false;
       const created = new Date(iss.created_at);
@@ -74,8 +79,9 @@ export default async function handler(req, res) {
       const issueUrl = `https://api.github.com/repos/${OWNER}/${REPO}/issues/${issue.number}`;
 
       if (CLEAN_MODE === "CLOSE") {
-        // Solo chiusura (lo togliamo dal feed che mostra solo "open")
+        // Modalità "soft": chiudiamo la issue
         const body = JSON.stringify({ state: "closed" });
+
         const r = await fetch(issueUrl, {
           method: "PATCH",
           headers: {
@@ -84,25 +90,24 @@ export default async function handler(req, res) {
           },
           body,
         });
+
         results.push({
           number: issue.number,
           action: "closed",
           status: r.status,
         });
       } else if (CLEAN_MODE === "DELETE") {
-        // "DELETE" simulato: chiudiamo e scrub del contenuto
+        // Modalità "hard": scrub contenuto + chiusura
+        const existingLabels = (issue.labels || [])
+          .map((l) => l.name || "")
+          .filter(Boolean);
+
         const body = JSON.stringify({
           state: "closed",
           title: `[expired] #${issue.number}`,
           body:
             "_This post has expired and its content has been removed by Ephemeral Social cleanup._",
-          // opzionale: aggiungi una label "expired"
-          labels: [
-            ...new Set(
-              (issue.labels || []).map((l) => l.name || "").filter(Boolean)
-            ),
-            "expired",
-          ],
+          labels: [...new Set([...existingLabels, "expired"])],
         });
 
         const r = await fetch(issueUrl, {
@@ -120,7 +125,7 @@ export default async function handler(req, res) {
           status: r.status,
         });
       } else {
-        // modalità sconosciuta: non facciamo niente
+        // Modalità sconosciuta → non facciamo nulla
         results.push({
           number: issue.number,
           action: "skipped_unknown_mode",
@@ -133,6 +138,7 @@ export default async function handler(req, res) {
       status: "ok",
       mode: CLEAN_MODE,
       cutoff: cutoffTime.toISOString(),
+      olderIssuesFound: oldIssues.length,
       processed: results.length,
       details: results,
     });
