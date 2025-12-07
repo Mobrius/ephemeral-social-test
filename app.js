@@ -17,7 +17,7 @@ function applyTheme(theme) {
 
   const btn = document.getElementById("themeToggleBtn");
   if (btn) {
-    btn.textContent = theme === "military" ? "Theme: Ops" : "Theme: Classic";
+    btn.textContent = theme === "military" ? "Ops" : "Classic";
   }
 }
 
