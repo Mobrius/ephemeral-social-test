@@ -197,12 +197,20 @@ async function fetchIssues() {
 }
 
 // ====== FEED ======
+// ====== FEED ======
 async function loadFeed() {
   const feedEl = document.getElementById("feed");
   const infoEl = document.getElementById("feedInfo");
   if (!feedEl) return;
 
-  feedEl.innerHTML = "<p class='es-help-text'>Loading feed...</p>";
+  // Se il feed è vuoto, mostriamo la scritta "Loading..."
+  const hadContent = feedEl.children.length > 0;
+  if (!hadContent) {
+    feedEl.innerHTML = "<p class='es-help-text'>Loading feed...</p>";
+  }
+  if (infoEl) {
+    infoEl.textContent = "Updating feed...";
+  }
 
   try {
     const issues = await fetchIssues();
@@ -222,7 +230,9 @@ async function loadFeed() {
 
     const limited = scored.slice(0, MAX_POSTS_CLIENT);
 
-    feedEl.innerHTML = "";
+    // Costruiamo il nuovo contenuto in un fragment, così non c'è flicker
+    const fragment = document.createDocumentFragment();
+
     limited.forEach(({ issue, score }) => {
       const postEl = document.createElement("article");
       postEl.className = "es-post";
@@ -234,7 +244,6 @@ async function loadFeed() {
       header.className = "es-post-header";
 
       const leftSpan = document.createElement("span");
-      // Se abbiamo un authorId, usiamo quello, altrimenti fallback a @github_user
       leftSpan.textContent = authorId ? authorId : `@${issue.user.login}`;
 
       const rightSpan = document.createElement("span");
@@ -250,7 +259,6 @@ async function loadFeed() {
       const bodyEl = document.createElement("div");
       bodyEl.className = "es-post-body";
 
-      // Mostriamo il body SENZA la riga tecnica [es-author]:... e la firma
       const cleanedBody = rawBody
         .replace(/\[es-author\]:\S+/, "")
         .replace(/\n?_Posted via Ephemeral Social_/, "")
@@ -269,7 +277,6 @@ async function loadFeed() {
         tagsWrap.appendChild(span);
       });
 
-      // Se vuoi mostrare lo score:
       if (topics.length) {
         const scoreSpan = document.createElement("span");
         scoreSpan.className = "es-tag-pill";
@@ -282,16 +289,26 @@ async function loadFeed() {
       postEl.appendChild(bodyEl);
       if (topics.length) postEl.appendChild(tagsWrap);
 
-      feedEl.appendChild(postEl);
+      fragment.appendChild(postEl);
     });
 
+    // Sostituiamo il contenuto tutto in una volta (niente "vuoto" visibile)
+    feedEl.innerHTML = "";
+    feedEl.appendChild(fragment);
+
     if (infoEl) {
-      infoEl.textContent = `Showing ${limited.length} posts · source: GitHub Issues (${issues.length} open)`;
+      const now = new Date();
+      infoEl.textContent = `Showing ${limited.length} posts · last update: ${now.toLocaleTimeString()}`;
     }
   } catch (err) {
     console.error(err);
-    feedEl.innerHTML = `<p class="es-help-text">Error loading feed. Please try again later.</p>`;
-    if (infoEl) infoEl.textContent = "";
+    // Mostriamo errore solo se non avevamo già contenuto
+    if (!hadContent) {
+      feedEl.innerHTML = `<p class="es-help-text">Error loading feed. Please try again later.</p>`;
+      if (infoEl) infoEl.textContent = "";
+    } else if (infoEl) {
+      infoEl.textContent = "Error updating feed (showing cached posts).";
+    }
   }
 }
 
