@@ -1,0 +1,115 @@
+/* ==========================================
+   MILITARY OPS – GREEN THEME
+   Attiva aggiungendo al <body>: class="military"
+   ========================================== */
+
+body.military {
+  --es-bg: #0a0f0a;
+  --es-bg-elevated: #131a13;
+  --es-border: #324232;
+  --es-text: #ecf5e1;
+  --es-muted: #aab8a2;
+
+  /* Verde militare + night vision lime */
+  --es-accent: #7bbf00;
+  --es-accent-soft: rgba(123, 191, 0, 0.20);
+
+  background: radial-gradient(circle at top, #1a2417 0, #0a0f0a 60%);
+  color: var(--es-text);
+}
+
+/* LOGO militare – verde camo + pattern diagonale */
+body.military .es-logo-circle {
+  background: repeating-linear-gradient(
+      135deg,
+      #284422,
+      #284422 6px,
+      #1e3518 6px,
+      #1e3518 12px
+  );
+  color: #d0ff9d;
+  border: 1px solid #3d5a34;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
+}
+
+/* Header + vetro militare */
+body.military .es-header {
+  background: rgba(10, 15, 10, 0.85);
+  border-bottom: 1px solid #3a4b3a;
+}
+
+/* Pulsanti – verde night ops */
+body.military .es-btn-primary,
+body.military .es-fab {
+  background: linear-gradient(135deg, #557a28, #7bbf00);
+  color: #f1ffe0;
+  box-shadow: 0 12px 28px rgba(50, 80, 20, 0.55);
+}
+
+body.military .es-btn-primary:hover,
+body.military .es-fab:hover {
+  filter: brightness(1.12);
+}
+
+/* Pulsante FAB refresh */
+body.military .es-fab-small {
+  background: linear-gradient(135deg, #344d1b, #6ea300);
+  color: #e9ffc7;
+}
+
+/* Form */
+body.military input[type="text"],
+body.military textarea {
+  background: #0c130c;
+  border-color: #2f402f;
+  color: #e9f4d9;
+}
+
+body.military input[type="text"]:focus,
+body.military textarea:focus {
+  border-color: #7bbf00;
+  box-shadow: 0 0 0 2px rgba(123, 191, 0, 0.25);
+}
+
+/* CHIPS */
+body.military .es-chip {
+  background: #0e150e;
+  border-color: #2d3c2d;
+  color: #9bb897;
+}
+body.military .es-chip--active {
+  background: rgba(123, 191, 0, 0.18);
+  border-color: #7bbf00;
+  color: #d7f7b4;
+}
+
+/* POST */
+body.military .es-post {
+  background: #121b12;
+  border-color: #3a4b3a;
+}
+
+body.military .es-post-header {
+  color: #8fa88b;
+}
+
+body.military .es-tag-pill {
+  border-color: #3a4b3a;
+  color: #9bb897;
+}
+
+body.military .es-tag-pill--match {
+  background: rgba(123, 191, 0, 0.20);
+  border-color: #7bbf00;
+  color: #d7f7b4;
+}
+
+/* Footer */
+body.military .es-footer {
+  background: #0d120d;
+  border-top-color: #364636;
+}
+
+body.military .es-footer a {
+  color: #a3db67;
+}
