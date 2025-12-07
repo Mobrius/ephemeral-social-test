@@ -357,6 +357,11 @@ window.addEventListener("DOMContentLoaded", () => {
     fabNewPost.addEventListener("click", openComposer);
   }
 
+  const fabRefresh = document.getElementById("fabRefresh");
+  if (fabRefresh) {
+    fabRefresh.addEventListener("click", loadFeed);
+  }
+
   const closeComposerBtn = document.getElementById("closeComposerBtn");
   if (closeComposerBtn) {
     closeComposerBtn.addEventListener("click", closeComposer);
