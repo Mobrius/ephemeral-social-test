@@ -94,6 +94,7 @@ function formatDate(dateStr) {
 function renderInterestsChips() {
   const interests = getLocalInterests();
   const container = document.getElementById("interestsChips");
+  if (!container) return;
   container.innerHTML = "";
 
   const allTopics = new Set(defaultTopics);
@@ -137,6 +138,8 @@ async function fetchIssues() {
 async function loadFeed() {
   const feedEl = document.getElementById("feed");
   const infoEl = document.getElementById("feedInfo");
+  if (!feedEl) return;
+
   feedEl.innerHTML = "<p class='es-help-text'>Loading feed...</p>";
 
   try {
@@ -220,12 +223,38 @@ async function loadFeed() {
       feedEl.appendChild(postEl);
     });
 
-    infoEl.textContent = `Showing ${limited.length} posts · source: GitHub Issues (${issues.length} open)`;
+    if (infoEl) {
+      infoEl.textContent = `Showing ${limited.length} posts · source: GitHub Issues (${issues.length} open)`;
+    }
   } catch (err) {
     console.error(err);
     feedEl.innerHTML = `<p class="es-help-text">Error loading feed. Please try again later.</p>`;
-    infoEl.textContent = "";
+    if (infoEl) infoEl.textContent = "";
   }
+}
+
+// ====== COMPOSER (overlay stile X) ======
+function openComposer() {
+  const overlay = document.getElementById("composerOverlay");
+  if (!overlay) return;
+  overlay.classList.remove("es-hidden");
+
+  const titleInput = document.getElementById("postTitle");
+  if (titleInput) {
+    setTimeout(() => titleInput.focus(), 10);
+  }
+
+  const statusEl = document.getElementById("publishStatus");
+  if (statusEl) {
+    statusEl.textContent = "";
+    statusEl.className = "es-status";
+  }
+}
+
+function closeComposer() {
+  const overlay = document.getElementById("composerOverlay");
+  if (!overlay) return;
+  overlay.classList.add("es-hidden");
 }
 
 // ====== PUBBLICAZIONE POST ======
@@ -234,6 +263,8 @@ async function publishPost() {
   const bodyInput = document.getElementById("postBody");
   const tagsInput = document.getElementById("postTags");
   const statusEl = document.getElementById("publishStatus");
+
+  if (!titleInput || !bodyInput || !tagsInput || !statusEl) return;
 
   const title = titleInput.value.trim();
   const body = bodyInput.value.trim();
@@ -282,6 +313,9 @@ async function publishPost() {
     bodyInput.value = "";
     tagsInput.value = "";
 
+    // chiudi il composer dopo il publish
+    closeComposer();
+
     // Ricarica feed dopo un attimo
     setTimeout(loadFeed, 1000);
   } catch (err) {
@@ -303,7 +337,10 @@ window.addEventListener("DOMContentLoaded", () => {
     badge.textContent = `Your ID: ${myAuthorId}`;
   }
 
-  document.getElementById("publishBtn").addEventListener("click", publishPost);
+  const publishBtn = document.getElementById("publishBtn");
+  if (publishBtn) {
+    publishBtn.addEventListener("click", publishPost);
+  }
 
   const refreshBtn = document.getElementById("refreshFeedBtn");
   if (refreshBtn) {
@@ -312,8 +349,26 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const newPostBtn = document.getElementById("newPostBtn");
   if (newPostBtn) {
-    newPostBtn.addEventListener("click", () => {
-      document.getElementById("postTitle").focus();
+    newPostBtn.addEventListener("click", openComposer);
+  }
+
+  const fabNewPost = document.getElementById("fabNewPost");
+  if (fabNewPost) {
+    fabNewPost.addEventListener("click", openComposer);
+  }
+
+  const closeComposerBtn = document.getElementById("closeComposerBtn");
+  if (closeComposerBtn) {
+    closeComposerBtn.addEventListener("click", closeComposer);
+  }
+
+  const overlay = document.getElementById("composerOverlay");
+  if (overlay) {
+    overlay.addEventListener("click", (e) => {
+      // chiudi se clicchi fuori dal box
+      if (e.target === overlay) {
+        closeComposer();
+      }
     });
   }
 

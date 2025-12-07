@@ -7,7 +7,9 @@
   <meta name="description" content="Ephemeral Social – un mini social effimero, open source e forkabile, basato su GitHub Issues.">
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
+  <!-- HEADER -->
   <header class="es-header">
     <div class="es-header-left">
       <div class="es-logo-circle">ES</div>
@@ -16,65 +18,94 @@
         <p class="es-subtitle">Open Edition · Posts effimeri, niente archivio eterno.</p>
       </div>
     </div>
+
     <span id="authorIdBadge" class="es-feed-info"></span>
+
     <div class="es-header-right">
       <button id="newPostBtn" class="es-btn es-btn-primary">+ New Post</button>
     </div>
   </header>
 
+  <!-- MAIN -->
   <main class="es-main">
+    <!-- LEFT COLUMN → ONLY INTERESTS -->
     <section class="es-column es-column-left">
-      <h2>New post</h2>
-      <p class="es-help-text">
-        Scrivi un pensiero breve. I post più vecchi verranno gradualmente
-        nascosti / rimossi. Nessun contenuto è eterno.
-      </p>
-      <div class="es-form-group">
-        <label for="postTitle">Title</label>
-        <input id="postTitle" type="text" maxlength="80" placeholder="Short title..." />
-      </div>
-      <div class="es-form-group">
-        <label for="postBody">Text</label>
-        <textarea id="postBody" rows="4" placeholder="What's on your mind?"></textarea>
-      </div>
-      <div class="es-form-group">
-        <label for="postTags">Tags (comma separated, optional)</label>
-        <input id="postTags" type="text" placeholder="ai, freedom, school" />
-      </div>
-      <button id="publishBtn" class="es-btn es-btn-primary">Publish</button>
-      <div id="publishStatus" class="es-status"></div>
-
-      <hr class="es-divider" />
-
       <h2>Your interests</h2>
       <p class="es-help-text">
-        Seleziona gli argomenti che ti interessano: il feed verrà ordinato in
-        base a queste preferenze (solo sul tuo browser).
+        Seleziona gli argomenti che ti interessano: il feed verrà ordinato
+        in base a queste preferenze (solo sul tuo browser).
       </p>
+
       <div id="interestsChips" class="es-chips"></div>
     </section>
 
+    <!-- RIGHT COLUMN → FEED -->
     <section class="es-column es-column-right">
       <div class="es-feed-header">
         <h2>Live feed</h2>
         <button id="refreshFeedBtn" class="es-btn es-btn-primary">Refresh</button>
         <span id="feedInfo" class="es-feed-info"></span>
       </div>
+
       <div id="feed" class="es-feed"></div>
     </section>
   </main>
 
+  <!-- COMPOSER OVERLAY (hidden by default) -->
+  <div id="composerOverlay" class="es-composer-overlay es-hidden">
+    <div class="es-composer">
+      <div class="es-composer-header">
+        <h2>New post</h2>
+        <button id="closeComposerBtn" class="es-icon-btn" aria-label="Close composer">×</button>
+      </div>
+
+      <p class="es-help-text">
+        Scrivi un pensiero breve. I post più vecchi verranno gradualmente
+        nascosti / rimossi. Nessun contenuto è eterno.
+      </p>
+
+      <div class="es-form-group">
+        <label for="postTitle">Title</label>
+        <input id="postTitle" type="text" maxlength="80" placeholder="Short title..." />
+      </div>
+
+      <div class="es-form-group">
+        <label for="postBody">Text</label>
+        <textarea id="postBody" rows="4" placeholder="What's on your mind?"></textarea>
+      </div>
+
+      <div class="es-form-group">
+        <label for="postTags">Tags (comma separated, optional)</label>
+        <input id="postTags" type="text" placeholder="ai, freedom, school" />
+      </div>
+
+      <div class="es-composer-footer">
+        <div id="publishStatus" class="es-status"></div>
+        <button id="publishBtn" class="es-btn es-btn-primary">Publish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING BUTTON FOR MOBILE -->
+  <button id="fabNewPost" class="es-fab">+</button>
+
+  <!-- FOOTER -->
   <footer class="es-footer">
     <span>
       Powered by <strong>Ephemeral Social – Open Edition</strong>.
     </span>
+
     <span>
       Want a <strong>custom-branded instance</strong> for your community or school?
       Contact: <a href="mailto:you@example.com">you@example.com</a>
-      <!-- Cambia l'email con la tua -->
     </span>
+
     <span>
-      Code: <a href="https://github.com/YOUR_GITHUB_USERNAME/ephemeral-social" target="_blank" rel="noreferrer">GitHub repo</a>
+      Code:
+      <a href="https://github.com/YOUR_GITHUB_USERNAME/ephemeral-social"
+         target="_blank" rel="noreferrer">
+        GitHub repo
+      </a>
     </span>
   </footer>
 
