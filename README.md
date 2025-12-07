@@ -102,7 +102,7 @@ No servers, no databases, no vendor lock-in.
 ### 1️⃣ Fork this repository
 
 ```
-https://github.com/YOUR_USERNAME/ephemeral-social
+https://github.com/Mobrius/ephemeral-social
 ```
 
 ### 2️⃣ Create a dedicated GitHub repository to store your posts
@@ -206,15 +206,10 @@ Open an Issue or submit a PR — this project thrives on community forks and exp
 
 ## 🧑‍💼 Custom-Branded Versions (Pro)
 
-I also offer:
+For custom-branded or commercial instances:
 
-* fully custom-branded instances
-* school / community editions
-* moderated editions
-* multi-user authentication versions
-* turnkey deployments
-
-Contact: **[you@example.com](mailto:you@example.com)**
+👉 Open a discussion here:  
+https://github.com/Mobrius/ephemeral-social/discussions
 
 ---
 
