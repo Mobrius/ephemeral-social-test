@@ -5,7 +5,11 @@
   <title>Ephemeral Social – Open Edition</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Ephemeral Social – un mini social effimero, open source e forkabile, basato su GitHub Issues.">
+
+  <!-- Tema base -->
   <link rel="stylesheet" href="style.css" />
+  <!-- Skin militare: override quando body ha class="military" -->
+  <link rel="stylesheet" href="style-military.css" />
 </head>
 
 <body>
@@ -22,6 +26,8 @@
     <span id="authorIdBadge" class="es-feed-info"></span>
 
     <div class="es-header-right">
+      <!-- Bottone per cambio tema -->
+      <button id="themeToggleBtn" class="es-btn">Theme: Classic</button>
       <button id="newPostBtn" class="es-btn es-btn-primary">+ New Post</button>
     </div>
   </header>
@@ -43,8 +49,6 @@
     <section class="es-column es-column-right">
       <div class="es-feed-header">
         <h2>Live feed</h2>
-        <button id="fabRefresh" class="es-fab es-fab-small">↻</button>
-
         <span id="feedInfo" class="es-feed-info"></span>
       </div>
 
@@ -87,8 +91,9 @@
     </div>
   </div>
 
-  <!-- FLOATING BUTTON FOR MOBILE -->
+  <!-- FLOATING BUTTONS FOR MOBILE -->
   <button id="fabNewPost" class="es-fab">+</button>
+  <button id="fabRefresh" class="es-fab es-fab-small">↻</button>
 
   <!-- FOOTER -->
   <footer class="es-footer">

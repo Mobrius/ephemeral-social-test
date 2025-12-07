@@ -4,6 +4,38 @@ const GITHUB_OWNER = "Mobrius";
 const GITHUB_REPO = "ephemeral-social-test"; // o il nome del repo
 const MAX_POSTS_CLIENT = 50; // quanti post mostrare al massimo nel feed
 
+// ====== THEME (classic / military) ======
+const THEME_KEY = "es_theme_v1";
+
+function applyTheme(theme) {
+  const body = document.body;
+  if (theme === "military") {
+    body.classList.add("military");
+  } else {
+    body.classList.remove("military");
+  }
+
+  const btn = document.getElementById("themeToggleBtn");
+  if (btn) {
+    btn.textContent = theme === "military" ? "Theme: Ops" : "Theme: Classic";
+  }
+}
+
+function initTheme() {
+  let theme = localStorage.getItem(THEME_KEY);
+  if (theme !== "military" && theme !== "classic") {
+    theme = "classic";
+  }
+  applyTheme(theme);
+}
+
+function toggleTheme() {
+  const isMilitary = document.body.classList.contains("military");
+  const next = isMilitary ? "classic" : "military";
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme(next);
+}
+
 // ====== AUTHOR ID LOCALE ======
 const AUTHOR_ID_KEY = "es_author_id_v1";
 
@@ -327,10 +359,18 @@ async function publishPost() {
 
 // ====== INIT ======
 window.addEventListener("DOMContentLoaded", () => {
+  // Tema
+  initTheme();
+  const themeBtn = document.getElementById("themeToggleBtn");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", toggleTheme);
+  }
+
+  // Interessi + feed
   renderInterestsChips();
   loadFeed();
 
-  // Mostra il tuo Author ID se hai aggiunto un badge nell'HTML
+  // Mostra il tuo Author ID
   const myAuthorId = getOrCreateAuthorId();
   const badge = document.getElementById("authorIdBadge");
   if (badge) {
@@ -340,11 +380,6 @@ window.addEventListener("DOMContentLoaded", () => {
   const publishBtn = document.getElementById("publishBtn");
   if (publishBtn) {
     publishBtn.addEventListener("click", publishPost);
-  }
-
-  const refreshBtn = document.getElementById("refreshFeedBtn");
-  if (refreshBtn) {
-    refreshBtn.addEventListener("click", loadFeed);
   }
 
   const newPostBtn = document.getElementById("newPostBtn");
