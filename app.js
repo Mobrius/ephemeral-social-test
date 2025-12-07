@@ -247,9 +247,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("publishBtn").addEventListener("click", publishPost);
 
+  document.getElementById("refreshFeedBtn").addEventListener("click", loadFeed);
+
   document.getElementById("newPostBtn").addEventListener("click", () => {
     document.getElementById("postTitle").focus();
   });
+
+  // Aggiorna automaticamente il feed ogni 20 secondi
+  setInterval(() => {
+    loadFeed();
+  }, 10000);
+
 });
-
-
